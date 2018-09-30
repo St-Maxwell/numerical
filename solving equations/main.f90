@@ -1,39 +1,48 @@
 program main
   implicit none
-  real(kind=8) :: low, up, guess
-  real(kind=8), external :: f, g1, g2, g3, d
+  real(kind=8) :: low, up, guess1, guess2
+  real(kind=8), external :: f, g1, g2, g3, d, dd
   real(kind=8) :: res
 
   low = 0.0D0
   up = 1.0D0
   call bisect(f, res, low, up)
   write(*,"('Bisection first root: ',F10.7)") res
-
+  
   low = -2.0D0
   up = -1.0D0
   call bisect(f, res, low, up)
   write(*,"('Bisection second root: ',F10.7)") res
-
-  guess = 5.0D-1
-  call fpi(g1, res, guess)
-  write(*,"('FPI first root: ',F10.7)") res
-
-  guess = 5.0D-1
-  call fpi(g2, res, guess)
+  
+  guess1 = 5.0D-1
+  call fpi(g1, res, guess1)
   write(*,"('FPI first root: ',F10.7)") res
   
-  guess = -1.5D0
-  call fpi(g3, res, guess)
+  guess1 = 5.0D-1
+  call fpi(g2, res, guess1)
+  write(*,"('FPI first root: ',F10.7)") res
+  
+  guess1 = -1.5D0
+  call fpi(g3, res, guess1)
   write(*,"('FPI Second root: ',F10.7)") res
   
-  guess = 1.0D0
-  call newton(f, d, res, guess)
+  guess1 = 1.0D0
+  call newton(f, d, res, guess1)
   write(*,"('Newton first root: ',F10.7)") res
-
-  guess = -1.0D0
-  call newton(f, d, res, guess)
+  
+  guess1 = -1.0D0
+  call newton(f, d, res, guess1)
   write(*,"('Newton second root: ',F10.7)") res
+  
+  guess1 = 1.0D0
+  guess2 = 8.0D-1
+  call secant(f, res, guess1, guess2)
+  write(*,"('Secant first root: ',F10.7)") res
 
+  guess1 = 1.0D0
+  call aug_newton(f, d, dd, res, guess1)
+  write(*,"('Aug Newton first root: ',F10.7)") res
+  
   stop
 end program
 
@@ -70,6 +79,12 @@ function d(x)
   d = x + x + 1.0D0
 end function
 
+function dd(x)
+  implicit none
+  real(kind=8) :: dd, x
+  dd = 2.0D0
+end function
+    
 subroutine bisect(func, res, low, up)
   ! func: function f(x)
   ! res: result
@@ -132,6 +147,53 @@ subroutine newton(func, deriv, res, x1)
   i = 1
   do while(.true.)
     x2 = x1 - func(x1) / deriv(x1)
+    if (abs(x2-x1) < error .or. i > maxsteps) exit
+    i = i + 1
+    x1 = x2
+  end do
+  res = x2
+
+end subroutine
+
+subroutine secant(func, res, x1, x2)
+  implicit none
+  real(kind=8) :: res, x1, x2
+  real(kind=8), external :: func
+  real(kind=8), parameter :: error = 5.0D-7
+  integer, parameter :: maxsteps = 129
+  real(kind=8) :: f1, f2, x3
+  integer :: i
+
+  i = 1
+  f1 = func(x1)
+  f2 = func(x2)
+  do while(.true.)
+    x3 = x2 - (x2 - x1) * f2 / (f2 - f1)
+    if (abs(x3-x2) < error .or. i > maxsteps) exit
+    i = i + 1
+    x1 = x2
+    x2 = x3
+    f1 = f2
+    f2 = func(x2)
+  end do
+  res = x3
+
+end subroutine
+
+subroutine aug_newton(func, df, ddf, res, x1)
+  implicit none
+  real(kind=8) :: res, x1, x2
+  real(kind=8), external :: func, df, ddf
+  real(kind=8), parameter :: error = 5.0D-7
+  integer, parameter :: maxsteps = 129
+  integer :: i
+  real(kind=8) :: temp1, temp2
+
+  i = 1
+  do while(.true.)
+    temp1 = func(x1)
+    temp2 = df(x1)
+    x2 = x1 - temp1 * temp2 / (temp2 * temp2 - temp1 * ddf(x1))
     if (abs(x2-x1) < error .or. i > maxsteps) exit
     i = i + 1
     x1 = x2
