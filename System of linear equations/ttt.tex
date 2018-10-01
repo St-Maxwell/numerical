@@ -1,0 +1,160 @@
+\documentclass{ctexart}
+\usepackage{amsmath,mathtools}
+\usepackage{graphicx,booktabs,array,listings}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{lmodern}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\title{方程组求解}
+\author{St Maxwell}
+\begin{document}
+\maketitle
+\lstset{
+basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=false,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=[95]Fortran,            % the language of the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files
+}
+
+\section{Gauss消元法}
+\[
+\begin{cases}
+2x-2y-z &= -2 \\
+4x+y-2z &= 1 \\
+-2x+y-z &= -3
+\end{cases}
+\]
+
+对于以上的线性方程组，可以将其写成（增广）矩阵的形式：
+\[
+\left(
+\begin{array}{c|c}
+\begin{matrix}
+2 & -2 & -1 \\
+4 & 1 & -2 \\
+-2 & 1 & -1
+\end{matrix}&
+\begin{matrix}
+-2 \\
+1 \\
+-3
+\end{matrix}
+\end{array}
+\right)
+\]
+
+使用Gauss消元法，首先通过矩阵初等变换进行消去，将左边变成上三角矩阵。
+\[
+\left(
+\begin{array}{c|c}
+\begin{matrix}
+2 & -2 & -1 \\
+0 &  5 &  0 \\
+0 &  0 & -2 \\
+\end{matrix}&
+\begin{matrix}
+-2 \\
+ 5 \\
+-4
+\end{matrix}
+\end{array}
+\right)
+\]
+
+之后进行回代，并将主元约化为$1$。
+\[
+\left(
+\begin{array}{c|c}
+\begin{matrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1 \\
+\end{matrix}&
+\begin{matrix}
+1 \\
+1 \\
+2
+\end{matrix}
+\end{array}
+\right)
+\]
+
+由此得到方程组的解。
+\[
+\begin{cases}
+x=1 \\
+y=1 \\
+z=2
+\end{cases}
+\]
+
+\section{fortran代码细节与LAPACK包}
+代码中的增广矩阵是使用\lstinline!reshape!函数生成的。
+\begin{lstlisting}[frame=trBL]
+ real(kind=8) :: mat(4,3) = reshape( (/ 2,-2, -1,-2, &
+                                        4, 1, -2, 1, &
+                                       -2, 1, -1,-3 /), (/ 4,3 /) )
+\end{lstlisting}
+所以矩阵元（数组元素）的下标和通常是相反的。例如，上面的增广矩阵中$a_{21}=4$；而在数组中，它对应于\lstinline!mat(1,2)!。
+
+要说明这一点的主要原因是，这个数组的定义方式与LAPACK包的\lstinline!dgesv!子程序对输入数组的要求是相反的。
+
+\begin{lstlisting}[frame=trBL]
+ PROGRAM Main
+  IMPLICIT NONE
+  REAL    :: A(3,3), b(3)
+  INTEGER ::  i, j, pivot(3), ok
+
+  ** Initialize A(:,:)
+  ** Initialize b(:)
+
+  CALL SGESV(3, 1, A, 3, pivot, b, 3, ok)    
+
+  PRINT *, b    !! Print solution
+ END PROGRAM
+\end{lstlisting}
+
+以上代码中的\lstinline!A(i,j)!即对应矩阵元$A_{ij}$。此时若依然使用\lstinline!reshape!函数，其矩阵元应按列依次定义。
+
+正式的项目中应该还是考虑使用LAPACK包，所以以后定义矩阵就选择第二种方式，而且也符合数学上的习惯。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
