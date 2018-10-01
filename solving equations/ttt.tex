@@ -190,5 +190,68 @@ n & x_n & x_{n+1} & x'_n & x'_{n+1} \\
 
 仅用了5步收敛到方程的解。
 
+\section{重根的情况}
+对于多重根的情况，Newton法是线性收敛的。
+
+以函数$f(x) = 2\mathrm{e}^{x-1} - x^2 - 1$为例，其$x=1$的根为三重根。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=20em]{plot6.png}
+  \caption{$f(x) = 2\mathrm{e}^{x-1} - x^2 - 1$}
+  \label{fig:plot6}
+\end{figure}
+\[
+f(x) = 2\mathrm{e}^{x-1} - x^2 - 1
+\]
+\[
+f'(x) = 2\mathrm{e}^{x-1} - 2x
+\]
+\[
+f''(x) = 2\mathrm{e}^{x-1} - 2
+\]
+\[
+f'''(x) = 2\mathrm{e}^{x-1}
+\]
+
+$f(x)$、$f'(x)$、$f''(x)$在$x=1$处均为零，$f'''(1)=2\neq0$，因此是三重根。
+
+先测试二分法与牛顿法。
+
+二分法的初始区间宽度为$1$（$[0.6,1.6]$），精度要求与之前相同，因此设定为20步。得到的输出结果为$1.0000239$，实际上并没有达到我们要求的精度。主要原因是在根附近的函数相当平缓，因此数值误差的影响很大。
+
+而对于Newton法，由于这是一个三重根的情况，$m=3$。所以可以估计其线性收敛速度为$2/3$。以下为其前5步：
+
+\begin{table}[htpb]
+\centering
+\caption{Newton法迭代过程}
+$\begin{array}{ccccc}
+    \toprule
+n & x_n & e_i/e_{i-1} \\
+\midrule
+ 1 & 1.34049846677307 &  \\
+ 2 & 1.23029037451719 & 0.676333073389934 \\
+ 3 & 1.15502223254582 & 0.673159843831200 \\
+ 4 & 1.10402251421791 & 0.671016747144078 \\
+ 5 & 1.06965098327047 & 0.669576041245875 \\
+\bottomrule
+\end{array}\label{table:newton2}$
+\end{table}
+
+最终经过30步迭代，得到的解为$1.0000010$。
+
+作为对比，还使用割线法与改进的Newton法进行计算。作为对比，将各方法的收敛情况作图：
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=30em]{plot7.png}
+  \caption{四种方法收敛情况}
+  \label{fig:plot7}
+\end{figure}
+
+其中改进Newton法使用的迭代公式如下：
+\[
+x_{i+1} = x_i - \frac{f(x_i)f'(x_i)}{[f'(x_i)]^2-f(x_i)f''(x_i)}
+\]
 
 \end{document}
