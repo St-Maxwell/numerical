@@ -1,6 +1,6 @@
 \documentclass{ctexart}
 \usepackage{amsmath}
-\usepackage{graphicx,booktabs,array}
+\usepackage{graphicx,booktabs,array,siunitx}
 
 \title{方程求解}
 \author{St Maxwell}
@@ -253,5 +253,46 @@ n & x_n & e_i/e_{i-1} \\
 \[
 x_{i+1} = x_i - \frac{f(x_i)f'(x_i)}{[f'(x_i)]^2-f(x_i)f''(x_i)}
 \]
+
+\section{应用案例}
+理想气体状态方程为$pV=nRT$。而对于实际气体，范德瓦尔斯方程则更为准确：
+\[
+\bigg( p + \frac{n^2 a}{V^2} \bigg)(V - nb) = nRT
+\]
+
+已知对于氧气，$a = \SI{1.36}{L^2.atm.mol^{-2}}$，$b=\SI{0.003183}{L.mol^{-1}}$。要求温度$\SI{320}{K}$，$压强\SI{15}{atm}$下$\SI{1}{mol}$氧气的实际体积。可先使用理想气体状态方程得到体积初猜，再通过范德瓦尔斯方程求得实际体积。
+
+将范德瓦尔斯方程展开并移项，
+\[
+pV + \frac{n^2 a}{V} - \frac{n^3 ab}{V^2} - n(RT + bp) = 0
+\]
+即问题等价于求以下函数的零点：
+\[
+f(V) = pV + \frac{n^2 a}{V} - \frac{n^3 ab}{V^2} - n(RT + bp) = 0
+\]
+使用Newton法，该函数的导数为：
+\[
+f'(V) = p - \frac{n^2 a}{V^2} + \frac{2n^3 ab}{V^3}
+\]
+
+将题中的值代入理想气体状态方程，得到初猜为$\SI{1.75}{L}$。再使用范德瓦尔斯方程，得到其实际体积为$\SI{1.70}{L}$。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}
