@@ -201,3 +201,31 @@ subroutine aug_newton(func, df, ddf, res, x1)
   res = x2
 
 end subroutine
+
+subroutine regfal(func, res, low, up)
+  implicit none
+  real(kind=8) :: res, low, up, mid, fa, fb, fc
+  real(kind=8), external :: func
+  real(kind=8), parameter :: error = 5.0D-7
+  integer, parameter :: maxsteps = 129
+  integer :: i
+
+  i = 1
+  fa = func(low)
+  fb = func(up)
+  do while(.true.)
+    mid = (up*fa - low*fb)/(fa - fb)
+    fc = func(mid)
+    if (abs(fc) < error .or. i > maxsteps) exit
+    if (fa*fc < 0.0D0 ) then
+      up = mid
+      fb = fc
+    else
+      low = mid
+      fa = fc
+    end if
+    i = i + 1
+  end do
+  res = mid
+
+end subroutine
