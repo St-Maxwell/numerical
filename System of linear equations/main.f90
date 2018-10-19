@@ -51,17 +51,26 @@ program main
   real(kind=8) :: res(3)
   real(kind=8) :: A(3,3) = reshape( (/ 2,4,-2,-2,1,1,-1,-2,-1 /), (/ 3,3 /) )
   real(kind=8) :: B(3) = (/ -2, 1, -3 /)
+  real(kind=8) :: C(3,3) = reshape( (/ 4.0,-1.0,1.0,-1.0,4.25,2.75,1.0,2.75,3.5 /), (/ 3,3 /) )
   real(kind=8) :: ipiv(3)
   integer :: i, j, info
 
-  len_res = size(res)
   write(*,"(4F5.1,/,4F5.1,/,4F5.1)") ((mat(i,j),i=1,4),j=1,3)
   call gauss_elim(mat,res)
   do i = 1, size(res)
     write(*,"('x',I2,' = ',F7.3)") i, res(i)
   end do
+  
+  ! computes the solution to the system of linear equations
   call dgesv( 3, 1, A, 3, ipiv, B, 3, info )
   do i = 1, size(B)
     write(*,"('x',I2,' = ',F7.3)") i, B(i)
   end do
+  
+  ! LU factorization of a matrix
+  !call dgetrf( 3, 3, A, 3, ipiv, info)
+  
+  ! Cholesky factorization of a symmetric (Hermitian) positive-definite matrix
+  call dpotrf( 'L', 3, C, 3, info)
+  
 end program
